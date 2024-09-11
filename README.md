@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # wellmed
 
 A new Flutter Hospital project.
@@ -14,3 +15,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# Hospital-Wellmed
+>>>>>>> 74f7cc6026f8ed15c000ec217bc940166cf73b20
