@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # wellmed
 
 A new Flutter Hospital project.
@@ -18,3 +19,6 @@ samples, guidance on mobile development, and a full API reference.
 =======
 # Hospital-Wellmed
 >>>>>>> 74f7cc6026f8ed15c000ec217bc940166cf73b20
+=======
+# HospitalPatientApp
+>>>>>>> 69caf1469fae78be5af469ea03e8fb4f2a670cef
