@@ -335,7 +335,7 @@ class SignInButton extends StatelessWidget {
         radius: 25,
         child: Image.asset(
           imagePath,
-          height: 35,
+          height: 25,
         ),
       ),
     );
