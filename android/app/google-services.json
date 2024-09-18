@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916537363308",
+    "project_id": "hospital-ebcaf",
+    "storage_bucket": "hospital-ebcaf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916537363308:android:68a0772c9f23ff3804c149",
+        "android_client_info": {
+          "package_name": "com.capztone.wellmed"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP3sJo1WUPpCSXFax_ATVnzcZqAdOhxRE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
