@@ -30,7 +30,7 @@ class MainPage extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'Welcome to the Home Page',
+          'Welcome to the Home Screen',
           style: TextStyle(fontSize: 25),
         ),
       ),
