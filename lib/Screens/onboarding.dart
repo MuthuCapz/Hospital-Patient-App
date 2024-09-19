@@ -70,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 imagePath: 'assets/images/onboarding3.png',
                 title: 'Discover Experienced Doctors',
                 description:
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
+                    'Lorem ipsum dolor sit , consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
               ),
             ],
           ),
