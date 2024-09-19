@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Text(
           'WellMed',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 25,
             fontFamily: 'Nunito', // Set the Nunito font here
             color: Colors.white,
           ),
