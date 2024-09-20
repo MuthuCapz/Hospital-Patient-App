@@ -207,32 +207,41 @@ class _HomeScreenState extends State<HomeMain> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Inside your HomeScreen widget
                 Container(
+                  height: 40,
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.search, color: Colors.black),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Search here',
-                            border: InputBorder.none,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SearchDoctors(), // Replace with your SearchDoctors page
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: const [
+                        Icon(Icons.search, color: Colors.black),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Search here',
+                            style: TextStyle(color: Colors.black54), // Placeholder text style
                           ),
                         ),
-                      ),
-                      Icon(Icons.filter_list, color: Colors.black),
-                    ],
+                        Icon(Icons.filter_list, color: Colors.black),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-
           // Banner Image
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -320,35 +329,44 @@ class _HomeScreenState extends State<HomeMain> {
     );
   }
 
-  // Helper to build a category item
+// Helper to build a category item
   Widget _buildCategoryItem(String title, String imagePath) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        children: [
-          Container(
-            width: 60, // Adjust the width as neecredded
-            height: 60, // Adjust the height as needed
-            decoration: BoxDecoration(
-              color: Colors.blue[100],
-              borderRadius:
-                  BorderRadius.circular(15), // Set the border radius here
-            ),
-            child: Center(
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.contain,
-                height: 30,
-                width: 30,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SpecialistCategory(specialistCategory: title),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.blue[100],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Center(
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.contain,
+                  height: 30,
+                  width: 30,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(color: Colors.black),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(color: Colors.black),
+            ),
+          ],
+        ),
       ),
     );
   }
