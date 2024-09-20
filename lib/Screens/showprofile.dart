@@ -4,7 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:wellmed/Screens/mainpage.dart';
+
 
 
 
@@ -93,7 +93,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       // Navigate to ManualProfileScreen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainPage()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
