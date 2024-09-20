@@ -4,9 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:wellmed/Screens/mainpage.dart';
-
-
+import 'package:wellmed/Screens/Homepage.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
   @override
@@ -20,13 +18,13 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   final _genders = ['Select', 'Male', 'Female', 'Other'];
   File? _imageFile;
 
-  Color primaryColor = Color(0xFF3366FF);
+  Color primaryColor = Color(0xFF0000FF);
   Color backgroundColor = Colors.white;
   Color textColor = Colors.black;
   Color subtitleColor = Colors.grey[500]!;
   Color inputFillColor = Colors.white;
   Color inputBorderColor = Colors.grey[700]!;
-  Color iconBackgroundColor = Color(0xFF3366FF);
+  Color iconBackgroundColor = Color(0xFF0000FF);
 
   final ImagePicker _picker = ImagePicker();
 
@@ -68,7 +66,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
     if (user != null) {
       DatabaseReference profileRef =
-      FirebaseDatabase.instance.ref().child('Profile').child(user.uid);
+          FirebaseDatabase.instance.ref().child('Profile').child(user.uid);
 
       await profileRef.set({
         'name': name,
@@ -93,7 +91,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       // Navigate to ManualProfileScreen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => MainPage()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -119,7 +117,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         centerTitle: true,
         toolbarHeight: 100.0,
       ),
-      resizeToAvoidBottomInset: true, // Ensures that the keyboard pushes up the content
+      resizeToAvoidBottomInset:
+          true, // Ensures that the keyboard pushes up the content
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -138,7 +137,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                     radius: 50,
                     backgroundColor: inputBorderColor,
                     backgroundImage:
-                    _imageFile != null ? FileImage(_imageFile!) : null,
+                        _imageFile != null ? FileImage(_imageFile!) : null,
                     child: _imageFile == null
                         ? Icon(Icons.person, size: 60, color: backgroundColor)
                         : null,
@@ -155,8 +154,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child:
-                          Icon(Icons.edit, size: 20, color: backgroundColor),
+                          child: Icon(Icons.edit,
+                              size: 20, color: backgroundColor),
                         ),
                       ),
                     ),
@@ -208,9 +207,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               value: _selectedGender,
               items: _genders
                   .map((gender) => DropdownMenuItem(
-                value: gender,
-                child: Text(gender, style: TextStyle(color: textColor)),
-              ))
+                        value: gender,
+                        child: Text(gender, style: TextStyle(color: textColor)),
+                      ))
                   .toList(),
               onChanged: (value) {
                 setState(() {
