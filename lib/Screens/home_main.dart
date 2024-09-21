@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../Map/mainlocation.dart';
 import '../models/Doctor.dart';
+import 'SearchDoctors.dart';
+import 'SpecialistCategory.dart';
 import 'doctorbio.dart';
 
 void main() async {
