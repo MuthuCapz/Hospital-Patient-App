@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wellmed/Screens/SearchDoctors.dart';
+import 'package:wellmed/Screens/SpecialistCategory.dart';
 
 import '../Map/mainlocation.dart';
 import '../models/Doctor.dart';
-import 'SearchDoctors.dart';
-import 'SpecialistCategory.dart';
 import 'doctorbio.dart';
 
 void main() async {
