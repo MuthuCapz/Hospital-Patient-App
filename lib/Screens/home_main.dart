@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wellmed/Screens/SearchDoctors.dart';
+import 'package:wellmed/Screens/SpecialistCategory.dart';
 
 import '../Map/mainlocation.dart';
 import '../models/Doctor.dart';
-import 'SearchDoctors.dart';
-import 'SpecialistCategory.dart';
 import 'doctorbio.dart';
 
 void main() async {
@@ -222,7 +222,8 @@ class _HomeScreenState extends State<HomeMain> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SearchDoctors(), // Replace with your SearchDoctors page
+                          builder: (context) =>
+                              SearchDoctors(), // Replace with your SearchDoctors page
                         ),
                       );
                     },
@@ -233,7 +234,9 @@ class _HomeScreenState extends State<HomeMain> {
                         Expanded(
                           child: Text(
                             'Search here',
-                            style: TextStyle(color: Colors.black54), // Placeholder text style
+                            style: TextStyle(
+                                color:
+                                    Colors.black54), // Placeholder text style
                           ),
                         ),
                         Icon(Icons.filter_list, color: Colors.black),
