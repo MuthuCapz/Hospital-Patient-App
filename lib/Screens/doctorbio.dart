@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wellmed/Screens/PaymentMethodScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -325,6 +326,11 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PaymentMethodsScreen()),
+                    );
                     // Ensure a time slot is selected before navigating
                     if (selectedTimeIndex != -1) {
                     } else {
