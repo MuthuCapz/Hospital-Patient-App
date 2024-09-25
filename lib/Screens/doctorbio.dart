@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:wellmed/Screens/patientdetails.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:wellmed/Screens/PaymentMethodScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -326,13 +326,19 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PaymentMethodsScreen()),
-                    );
                     // Ensure a time slot is selected before navigating
                     if (selectedTimeIndex != -1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientDetailsScreen(
+                            DoctorName: name,
+                            DoctorSpecialist: specialist,
+                            AppointmentTime: timeSlots[selectedTimeIndex],
+                            AppointmentDate: selectedDate,
+                          ),
+                        ),
+                      );
                     } else {
                       // Optionally, show a message if no time is selected
                       ScaffoldMessenger.of(context).showSnackBar(
