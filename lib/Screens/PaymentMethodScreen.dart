@@ -38,15 +38,24 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     String upiUrl =
         "upi://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR";
 
-    // Handle Google Pay with the package name
+    print(upiUrl); // Debugging the UPI URL
+
     if (_selectedPaymentMethod == 'Google Pay') {
       if (await canLaunch(upiUrl)) {
-        await launch(
-          upiUrl,
-          forceSafariVC: false,
-          forceWebView: false,
-          universalLinksOnly: false,
-        );
+        try {
+          await launch(
+            upiUrl,
+            forceSafariVC: false,
+            forceWebView: false,
+            universalLinksOnly: false,
+          );
+        } catch (e) {
+          print("Error launching UPI payment: $e");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Error initiating payment. Please try again.')),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Google Pay app is not installed.')),
