@@ -3,20 +3,22 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:wellmed/Screens/PaymentMethodScreen.dart';
-import 'package:fluttertoast/fluttertoast.dart'; // For showing Toast messages
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:wellmed/Screens/PaymentMethodScreen.dart'; // For showing Toast messages
 
 class PatientDetailsScreen extends StatefulWidget {
   final String DoctorName;
   final String DoctorSpecialist;
   final String AppointmentTime;
   final DateTime AppointmentDate;
+  final String DoctorProfileImage;
 
   PatientDetailsScreen({
     required this.DoctorName,
     required this.DoctorSpecialist,
     required this.AppointmentTime,
     required this.AppointmentDate,
+    required this.DoctorProfileImage,
   });
 
   @override
@@ -30,6 +32,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   String? _uploadedFileName;
   String _patientName = '';
   String _patientIssue = '';
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _issueController = TextEditingController();
 
@@ -55,44 +58,77 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       }
       final userId = user.uid;
 
-      // Create a reference to the appointments node in Firebase Database
-      DatabaseReference appointmentRef = FirebaseDatabase.instance
+      // Reference to the user's appointments in Firebase
+      DatabaseReference appointmentsRef = FirebaseDatabase.instance
           .reference()
           .child('Patient Appointments')
-          .child(userId)
-          .push();
+          .child(userId);
 
-      // Prepare data to save
-      Map<String, dynamic> appointmentData = {
-        'DoctorName': widget.DoctorName,
-        'DoctorSpecialist': widget.DoctorSpecialist,
-        'AppointmentTime': widget.AppointmentTime,
-        'AppointmentDate':
-            DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
-        'PatientName': _patientName,
-        'PatientAge': _selectedAge,
-        'BookingFor': _selectedBookingFor,
-        'Gender': _selectedGender,
-        'Document': _uploadedFileName ?? '',
-        'PatientIssue': _patientIssue,
-      };
+      // Check if an appointment with the same doctor, time, and date already exists
+      DatabaseEvent event = await appointmentsRef.once();
+      DataSnapshot snapshot =
+          event.snapshot; // Extract the DataSnapshot from the DatabaseEvent
+      bool appointmentExists = false;
 
-      // Save the data to Firebase
-      await appointmentRef.set(appointmentData);
+      if (snapshot.value != null) {
+        Map<dynamic, dynamic> appointments =
+            snapshot.value as Map<dynamic, dynamic>;
+        appointments.forEach((key, value) {
+          if (value['DoctorName'] == widget.DoctorName &&
+              value['AppointmentTime'] == widget.AppointmentTime &&
+              value['AppointmentDate'] ==
+                  DateFormat('dd MMM yyyy').format(widget.AppointmentDate)) {
+            appointmentExists = true;
+          }
+        });
+      }
 
-      // Show success message
-      Fluttertoast.showToast(
-        msg: "Your appointment is booked successfully!",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
+      if (appointmentExists) {
+        // Show a message if the appointment already exists
+        Fluttertoast.showToast(
+          msg: "You already have an appointment with this doctor at this time.",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      } else {
+        // Create a new appointment
+        DatabaseReference newAppointmentRef = appointmentsRef.push();
 
-      // Navigate to payment screen after successful booking
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => PaymentMethodsScreen()),
-      );
+        // Prepare data to save
+        Map<String, dynamic> appointmentData = {
+          'DoctorName': widget.DoctorName,
+          'DoctorSpecialist': widget.DoctorSpecialist,
+          'AppointmentTime': widget.AppointmentTime,
+          'DoctorProfileImage': widget.DoctorProfileImage,
+          'AppointmentDate':
+              DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
+          'PatientName': _patientName,
+          'PatientAge': _selectedAge,
+          'BookingFor': _selectedBookingFor,
+          'Gender': _selectedGender,
+          'Document': _uploadedFileName ?? '',
+          'PatientIssue': _patientIssue,
+          'Status': 'Upcoming'
+        };
+
+        // Save the data to Firebase
+        await newAppointmentRef.set(appointmentData);
+
+        // Show success message
+        Fluttertoast.showToast(
+          msg: "Your appointment is booked successfully!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+
+        // Navigate to payment screen after successful booking
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PaymentMethodsApp()),
+        );
+      }
     } catch (e) {
+      // Show error message
       Fluttertoast.showToast(
         msg: "Failed to book appointment: $e",
         toastLength: Toast.LENGTH_LONG,
@@ -115,11 +151,28 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Doctor: ${widget.DoctorName}'),
-                Text('Specialist: ${widget.DoctorSpecialist}'),
-                Text('Appointment Time: ${widget.AppointmentTime}'),
-                Text(
-                    'Appointment Date: ${DateFormat('dd MMM yyyy').format(widget.AppointmentDate)}'),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 40, // Adjust the radius as needed
+                      backgroundImage: NetworkImage(
+                          widget.DoctorProfileImage), // Load image from URL
+                      backgroundColor:
+                          Colors.grey[300], // Background color for placeholder
+                    ),
+                    SizedBox(width: 15), // Spacing between the avatar and text
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Doctor: ${widget.DoctorName}'),
+                        Text('Specialist: ${widget.DoctorSpecialist}'),
+                        Text('Appointment Time: ${widget.AppointmentTime}'),
+                        Text(
+                            'Appointment Date: ${DateFormat('dd MMM yyyy').format(widget.AppointmentDate)}'),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
