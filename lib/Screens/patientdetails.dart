@@ -62,19 +62,19 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           .child(userId)
           .push();
 
-      // Prepare data to save
+      // Prepare data to save, adding 'status' field
       Map<String, dynamic> appointmentData = {
         'DoctorName': widget.DoctorName,
         'DoctorSpecialist': widget.DoctorSpecialist,
         'AppointmentTime': widget.AppointmentTime,
-        'AppointmentDate':
-            DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
+        'AppointmentDate': DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
         'PatientName': _patientName,
         'PatientAge': _selectedAge,
         'BookingFor': _selectedBookingFor,
         'Gender': _selectedGender,
         'Document': _uploadedFileName ?? '',
         'PatientIssue': _patientIssue,
+        'status': 'upcoming',  // Add status field with value 'upcoming'
       };
 
       // Save the data to Firebase

@@ -194,24 +194,30 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
               ),
               SizedBox(height: 20),
 
-              // Working Hours
+// Working Hours
               Text('Working Hours',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(timeSlots.length, (index) {
-                  return TimeSlotWidget(
-                    time: timeSlots[index],
-                    isSelected: selectedTimeIndex == index,
-                    onTap: () {
-                      setState(() {
-                        selectedTimeIndex = index;
-                      });
-                    },
-                  );
-                }),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                child: Row(
+                  children: List.generate(timeSlots.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0), // Add spacing
+                      child: TimeSlotWidget(
+                        time: timeSlots[index],
+                        isSelected: selectedTimeIndex == index,
+                        onTap: () {
+                          setState(() {
+                            selectedTimeIndex = index;
+                          });
+                        },
+                      ),
+                    );
+                  }),
+                ),
               ),
+
               SizedBox(height: 20),
 
               // Schedule Section (Calendar)
