@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wellmed/Screens/homepage.dart';
+import 'package:wellmed/Screens/HomePage.dart';
 
 import 'onboarding.dart'; // Import for SharedPreferences
 

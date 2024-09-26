@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wellmed/Screens/Profile.dart';
 import 'package:wellmed/Screens/SearchDoctors.dart';
 import 'package:wellmed/Screens/SpecialistCategory.dart';
 
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeMain> {
 
       // First, try to retrieve locality from "Patient Location"
       final patientLocationSnapshot =
-          await _database.child('Patient Location/$userId/locality').get();
+      await _database.child('Patient Location/$userId/locality').get();
 
       if (patientLocationSnapshot.exists) {
         setState(() {
@@ -53,7 +54,7 @@ class _HomeScreenState extends State<HomeMain> {
       } else {
         // If "Patient Location" is not found, try retrieving city from "Manual Location"
         final manualLocationSnapshot =
-            await _database.child('Manual Location/$userId/city').get();
+        await _database.child('Manual Location/$userId/city').get();
 
         if (manualLocationSnapshot.exists) {
           setState(() {
@@ -113,7 +114,7 @@ class _HomeScreenState extends State<HomeMain> {
       }
 
       final profileImageSnapshot =
-          await _database.child('Profile/$userId/profile_image').get();
+      await _database.child('Profile/$userId/profile_image').get();
 
       if (profileImageSnapshot.exists) {
         setState(() {
@@ -145,11 +146,23 @@ class _HomeScreenState extends State<HomeMain> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: CircleAvatar(
-              backgroundImage: _profileImageUrl.isNotEmpty
-                  ? NetworkImage(_profileImageUrl)
-                  : const AssetImage('assets/images/default_profile.png')
-                      as ImageProvider,
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to the profile screen when the profile image is clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProfileScreen(), // Replace this with your ProfileScreen widget
+                  ),
+                );
+              },
+              child: CircleAvatar(
+                backgroundImage: _profileImageUrl.isNotEmpty
+                    ? NetworkImage(_profileImageUrl)
+                    : const AssetImage('assets/images/default_profile.png')
+                as ImageProvider,
+              ),
             ),
           ),
         ],
@@ -236,7 +249,7 @@ class _HomeScreenState extends State<HomeMain> {
                             'Search here',
                             style: TextStyle(
                                 color:
-                                    Colors.black54), // Placeholder text style
+                                Colors.black54), // Placeholder text style
                           ),
                         ),
                         Icon(Icons.filter_list, color: Colors.black),
@@ -277,7 +290,7 @@ class _HomeScreenState extends State<HomeMain> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding:
-                        const EdgeInsets.only(left: 5.5), // Margin for ListView
+                    const EdgeInsets.only(left: 5.5), // Margin for ListView
                     children: [
                       _buildCategoryItem(
                           'General', 'assets/images/general.png'),
@@ -304,31 +317,31 @@ class _HomeScreenState extends State<HomeMain> {
           _doctors.isEmpty
               ? const Center(child: Text('No doctors found'))
               : ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _doctors.length,
-                  itemBuilder: (context, index) {
-                    final doctor = _doctors[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DoctorBioScreen(
-                              doctorName: doctor.name,
-                              doctorSpecialist: doctor.specialist,
-                            ),
-                          ),
-                        );
-                      },
-                      child: _buildDoctorCard(
-                        doctor.name,
-                        doctor.specialist,
-                        doctor.profileImage,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: _doctors.length,
+            itemBuilder: (context, index) {
+              final doctor = _doctors[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DoctorBioScreen(
+                        doctorName: doctor.name,
+                        doctorSpecialist: doctor.specialist,
                       ),
-                    );
-                  },
+                    ),
+                  );
+                },
+                child: _buildDoctorCard(
+                  doctor.name,
+                  doctor.specialist,
+                  doctor.profileImage,
                 ),
+              );
+            },
+          ),
         ]),
       ),
     );
