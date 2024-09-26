@@ -8,18 +8,18 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   int currentPage = 0;
 
   List<Widget> _buildPageIndicators() {
     return List<Widget>.generate(3, (int index) {
       return AnimatedContainer(
-        duration: Duration(milliseconds: 150),
-        margin: EdgeInsets.symmetric(horizontal: 5.0),
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.symmetric(horizontal: 5.0),
         height: 10.0,
         width: index == currentPage ? 20.0 : 10.0,
         decoration: BoxDecoration(
-          color: index == currentPage ? Color(0xFF0000FF) : Colors.grey,
+          color: index == currentPage ? const Color(0xFF0000FF) : Colors.grey,
           borderRadius: BorderRadius.circular(5.0),
         ),
       );
@@ -79,22 +79,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 currentPage == 0
-                    ? SizedBox.shrink()
+                    ? const SizedBox.shrink()
                     : Container(
                   decoration: BoxDecoration(
                     color: Colors.transparent, // No fill color
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Color(0xFF0000FF), // Stroke color
+                      color: const Color(0xFF0000FF), // Stroke color
                       width: 2.0, // Stroke width
                     ),
                   ),
                   child: IconButton(
                     icon:
-                    Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
+                    const Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
                     onPressed: () {
                       _pageController.previousPage(
-                          duration: Duration(milliseconds: 300),
+                          duration: const Duration(milliseconds: 300),
                           curve: Curves.ease);
                     },
                   ),
@@ -103,16 +103,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   children: _buildPageIndicators(),
                 ),
                 Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Color(0xFF0000FF), // Filled background color
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: Icon(Icons.arrow_forward, color: Colors.white),
+                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
                     onPressed: () {
                       if (currentPage < 2) {
                         _pageController.nextPage(
-                            duration: Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 300),
                             curve: Curves.ease);
                       } else {
                         // Complete onboarding
@@ -132,7 +132,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // Skip to the login screen and mark onboarding as complete
                 _completeOnboarding();
               },
-              child: Text(
+              child: const Text(
                 'Skip',
                 style: TextStyle(
                   fontSize: 18.0,
@@ -167,20 +167,20 @@ class OnboardingPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(imagePath, height: 300.0),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0000FF),
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 10.0),
+          const SizedBox(height: 10.0),
           Text(
             description,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16.0,
               color: Colors.black54,
             ),
