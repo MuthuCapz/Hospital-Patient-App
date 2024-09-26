@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:upi_india/upi_india.dart';
 
 void main() {
   runApp(PaymentMethodsApp());
@@ -22,59 +22,91 @@ class PaymentMethodsScreen extends StatefulWidget {
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   String _selectedPaymentMethod = 'Google Pay';
+  String _upiID = "viprevf@hsbc"; // Replace with the UPI ID
+  String _payeeName = "Fishfy"; // Replace with the payee name
+  String _transactionNote = "Payment Note"; // Replace with a transaction note
+  double _amount = 1.00; // Set ₹1 for the transaction
 
-  // UPI details
-  final String _upiID = "9845779437.ibz@icici"; // Replace with the UPI ID
-  final String _payeeName = "Fishfy"; // Replace with the payee name
-  final String _transactionNote =
-      "Payment Note"; // Replace with a transaction note
-  final double _amount = 1.00; // Example amount
+  UpiIndia _upiIndia = UpiIndia();
+  Future<UpiResponse>? _transaction;
 
-  // Google Pay package name
-  final String _googlePayPackageName = "com.google.android.apps.nbu.paisa.user";
+  // Initiating a UPI transaction
+  String _generateUniqueTransactionRefId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
 
-  // Method to open the UPI app based on the selected payment method
-  void _openPaymentApp() async {
-    String upiUrl =
-        "upi://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR";
+  Future<UpiResponse> initiateTransaction() async {
+    return await _upiIndia.startTransaction(
+      app: _selectedUpiApp(),
+      receiverUpiId: _upiID,
+      receiverName: _payeeName,
+      transactionRefId: _generateUniqueTransactionRefId(),
+      transactionNote: _transactionNote,
+      amount: _amount,
+    );
+  }
 
-    // Handle Google Pay with the package name
-    if (_selectedPaymentMethod == 'Google Pay') {
-      if (await canLaunch(upiUrl)) {
-        await launch(
-          upiUrl,
-          forceSafariVC: false,
-          forceWebView: false,
-          universalLinksOnly: false,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google Pay app is not installed.')),
-        );
-      }
+  UpiApp _selectedUpiApp() {
+    switch (_selectedPaymentMethod) {
+      case 'Google Pay':
+        return UpiApp.googlePay;
+      case 'PhonePe':
+        return UpiApp.phonePe;
+      case 'Paytm':
+        return UpiApp.paytm;
+      default:
+        return UpiApp.googlePay; // Default app
+    }
+  }
+
+  void _makePayment() {
+    if (_selectedUpiApp() == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select a UPI app")),
+      );
     } else {
-      // Handle other UPI apps (PhonePe, Paytm)
-      switch (_selectedPaymentMethod) {
-        case 'PhonePe':
-          upiUrl =
-              "phonepe://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR";
-          break;
-        case 'Paytm':
-          upiUrl =
-              "paytmmp://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR";
-          break;
-        default:
-          return;
-      }
+      setState(() {
+        _transaction = initiateTransaction();
+      });
+    }
+  }
 
-      if (await canLaunch(upiUrl)) {
-        await launch(upiUrl, forceSafariVC: false, forceWebView: false);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Unable to open $_selectedPaymentMethod app.')),
-        );
-      }
+  void checkInstalledUpiApps() async {
+    List<UpiApp>? apps = await _upiIndia.getAllUpiApps();
+    if (apps == null || apps.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("No UPI apps found. Please install a UPI app.")),
+      );
+    }
+  }
+
+  // Display the result of the UPI transaction
+  Widget _displayUpiResponse(UpiResponse response) {
+    String txnStatus = response.status ?? "Unknown";
+
+    if (txnStatus == UpiPaymentStatus.SUCCESS) {
+      return Column(
+        children: [
+          Text('Transaction Successful!'),
+          Text('Transaction ID: ${response.transactionId}'),
+        ],
+      );
+    } else if (txnStatus == UpiPaymentStatus.FAILURE) {
+      return Column(
+        children: [
+          Text('Transaction Failed. Please try again.'),
+          Text('Error Code: ${response.responseCode}'),
+        ],
+      );
+    } else if (txnStatus == UpiPaymentStatus.SUBMITTED) {
+      return Column(
+        children: [
+          Text('Transaction Submitted. Please wait for confirmation.'),
+          Text('Transaction ID: ${response.transactionId}'),
+        ],
+      );
+    } else {
+      return Text('Unknown Transaction Status: $txnStatus');
     }
   }
 
@@ -93,7 +125,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         elevation: 1.0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -159,17 +191,43 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _openPaymentApp,
+                  onPressed: _makePayment,
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 80, vertical: 16),
+                    backgroundColor: Color(0xFF0000FF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: Text(
                     'Make Payment',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
+            ),
+            FutureBuilder<UpiResponse>(
+              future: _transaction,
+              builder:
+                  (BuildContext context, AsyncSnapshot<UpiResponse> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Text("Processing transaction...");
+                } else if (snapshot.hasError) {
+                  return Text("Error: ${snapshot.error}");
+                } else if (snapshot.hasData) {
+                  if (snapshot.data == null) {
+                    return Text("No response received. Try again.");
+                  } else {
+                    return _displayUpiResponse(snapshot.data!);
+                  }
+                } else {
+                  return Text("Unknown issue occurred. Please try again.");
+                }
+              },
             ),
           ],
         ),
