@@ -37,10 +37,27 @@ class DoctorBioScreen extends StatefulWidget {
 }
 
 class _DoctorBioScreenState extends State<DoctorBioScreen> {
-  int selectedTimeIndex = -1; // For time selection
+  int selectedMorningTimeIndex = -1; // For morning time selection
+  int selectedAfternoonTimeIndex = -1; // For afternoon time selection
+  int selectedEveningTimeIndex = -1; // For evening time selection
   DateTime selectedDate = DateTime.now(); // For selected date
 
-  final List<String> timeSlots = ['08.00 AM', '10.00 AM', '12.00 PM'];
+  final List<String> morningSlots = [
+    '08:00 AM',
+    '09:00 AM',
+    '10:00 AM',
+    '11:00 AM'
+  ];
+  final List<String> afternoonSlots = [
+    '12:30 PM',
+    '01:00 PM',
+    '02:00 PM',
+    '03:00 PM'
+  ];
+  final List<String> eveningSlots = ['04:00 PM', '05:00 PM', '06:00 PM'];
+
+  // Combining all the time slots into one list
+  late List<String> timeSlots;
   late String name;
   late String specialist;
   String profileImage = '';
@@ -55,6 +72,11 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
     super.initState();
     name = widget.doctorName;
     specialist = widget.doctorSpecialist;
+    timeSlots = [
+      ...morningSlots,
+      ...afternoonSlots,
+      ...eveningSlots
+    ]; // Combine slots
     _fetchDoctorDetails();
   }
 
@@ -193,25 +215,103 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                 style: TextStyle(color: Colors.grey, height: 1.5),
               ),
               SizedBox(height: 20),
-
               // Working Hours
               Text('Working Hours',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(timeSlots.length, (index) {
+
+              // Morning Slots
+              Text('Morning',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  mainAxisExtent: 40,
+                ),
+                itemCount: morningSlots.length,
+                itemBuilder: (context, index) {
                   return TimeSlotWidget(
-                    time: timeSlots[index],
-                    isSelected: selectedTimeIndex == index,
+                    time: morningSlots[index],
+                    isSelected: selectedMorningTimeIndex == index,
                     onTap: () {
                       setState(() {
-                        selectedTimeIndex = index;
+                        selectedMorningTimeIndex = index;
+                        selectedAfternoonTimeIndex =
+                            -1; // Deselect afternoon slot
+                        selectedEveningTimeIndex = -1; // Deselect evening slot
                       });
                     },
                   );
-                }),
+                },
               ),
+
+              SizedBox(height: 20),
+
+              // Afternoon Slots
+              Text('Afternoon',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  mainAxisExtent: 40,
+                ),
+                itemCount: afternoonSlots.length,
+                itemBuilder: (context, index) {
+                  return TimeSlotWidget(
+                    time: afternoonSlots[index],
+                    isSelected: selectedAfternoonTimeIndex == index,
+                    onTap: () {
+                      setState(() {
+                        selectedAfternoonTimeIndex = index;
+                        selectedMorningTimeIndex = -1; // Deselect morning slot
+                        selectedEveningTimeIndex = -1; // Deselect evening slot
+                      });
+                    },
+                  );
+                },
+              ),
+              SizedBox(height: 20),
+
+              // Evening Slots
+              Text('Evening',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  mainAxisExtent: 40,
+                ),
+                itemCount: eveningSlots.length,
+                itemBuilder: (context, index) {
+                  return TimeSlotWidget(
+                    time: eveningSlots[index],
+                    isSelected: selectedEveningTimeIndex == index,
+                    onTap: () {
+                      setState(() {
+                        selectedEveningTimeIndex = index;
+                        selectedMorningTimeIndex = -1; // Deselect morning slot
+                        selectedAfternoonTimeIndex =
+                            -1; // Deselect afternoon slot
+                      });
+                    },
+                  );
+                },
+              ),
+
               SizedBox(height: 20),
 
               // Schedule Section (Calendar)
@@ -326,21 +426,54 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure a time slot is selected before navigating
-                    if (selectedTimeIndex != -1) {
+                    // Ensure a time slot is selected from any of the morning, afternoon, or evening slots
+                    if (selectedMorningTimeIndex != -1) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PatientDetailsScreen(
                             DoctorName: name,
                             DoctorSpecialist: specialist,
-                            AppointmentTime: timeSlots[selectedTimeIndex],
+                            AppointmentTime:
+                                morningSlots[selectedMorningTimeIndex],
                             AppointmentDate: selectedDate,
+                            DoctorProfileImage:
+                                profileImage, // Pass the profile image here
+                          ),
+                        ),
+                      );
+                    } else if (selectedAfternoonTimeIndex != -1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientDetailsScreen(
+                            DoctorName: name,
+                            DoctorSpecialist: specialist,
+                            AppointmentTime:
+                                afternoonSlots[selectedAfternoonTimeIndex],
+                            AppointmentDate: selectedDate,
+                            DoctorProfileImage:
+                                profileImage, // Pass the profile image here
+                          ),
+                        ),
+                      );
+                    } else if (selectedEveningTimeIndex != -1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientDetailsScreen(
+                            DoctorName: name,
+                            DoctorSpecialist: specialist,
+                            AppointmentTime:
+                                eveningSlots[selectedEveningTimeIndex],
+                            AppointmentDate: selectedDate,
+                            DoctorProfileImage:
+                                profileImage, // Pass the profile image here
                           ),
                         ),
                       );
                     } else {
-                      // Optionally, show a message if no time is selected
+                      // Show a message if no time slot is selected
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Please select a time slot.')),
                       );
@@ -394,34 +527,32 @@ class TimeSlotWidget extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  TimeSlotWidget(
-      {required this.time, required this.isSelected, required this.onTap});
+  TimeSlotWidget({
+    required this.time,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        height: 40, // Reduced height to 40
+        width: 100, // Adjusted width to 100
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? Color(0xFF0000FF) : Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-              color: isSelected ? Color(0xFF0000FF) : Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade200,
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
+            color: isSelected ? Color(0xFF0000FF) : Colors.grey.shade300,
+          ),
         ),
         child: Text(
           time,
           style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold),
+            color: isSelected ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );

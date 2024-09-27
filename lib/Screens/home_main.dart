@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:wellmed/Screens/Profile.dart';
 import 'package:wellmed/Screens/SearchDoctors.dart';
 import 'package:wellmed/Screens/SpecialistCategory.dart';
 
@@ -145,11 +146,23 @@ class _HomeScreenState extends State<HomeMain> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: CircleAvatar(
-              backgroundImage: _profileImageUrl.isNotEmpty
-                  ? NetworkImage(_profileImageUrl)
-                  : const AssetImage('assets/images/default_profile.png')
-                      as ImageProvider,
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to the profile screen when the profile image is clicked
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProfileScreen(), // Replace this with your ProfileScreen widget
+                  ),
+                );
+              },
+              child: CircleAvatar(
+                backgroundImage: _profileImageUrl.isNotEmpty
+                    ? NetworkImage(_profileImageUrl)
+                    : const AssetImage('assets/images/default_profile.png')
+                        as ImageProvider,
+              ),
             ),
           ),
         ],
