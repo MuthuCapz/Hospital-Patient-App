@@ -108,7 +108,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           'Gender': _selectedGender,
           'Document': _uploadedFileName ?? '',
           'PatientIssue': _patientIssue,
-          'Status': 'upcoming'
+          'status': 'upcoming'
         };
 
         // Save the data to Firebase

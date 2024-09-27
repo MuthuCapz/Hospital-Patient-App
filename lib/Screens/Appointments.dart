@@ -47,6 +47,7 @@ class _AppointmentsPageState extends State<Appointments>
     appointmentsRef.once().then((DatabaseEvent event) {
       Map<dynamic, dynamic>? values =
       event.snapshot.value as Map<dynamic, dynamic>?;
+
       if (values != null) {
         values.forEach((bookingId, appointmentData) {
           String status = appointmentData['status'] ?? 'upcoming';
@@ -57,13 +58,15 @@ class _AppointmentsPageState extends State<Appointments>
               appointmentData['AppointmentDate'], appointmentData['AppointmentTime']);
 
           // Update status to 'canceled' if the appointment has expired
-          if (isExpired) {
+          if (isExpired && status != 'canceled') {
             status = 'canceled';
-            appointmentData['status'] = 'canceled'; // Update local status
-            appointmentsRef.child(bookingId).update({'status': 'canceled'}); // Update Firebase
+            appointmentData['status'] = 'canceled';  // Update local status
+
+            // Update Firebase to mark appointment as canceled
+            appointmentsRef.child(bookingId).update({'status': 'canceled'});
           }
 
-          // Categorize appointments based on status
+          // Categorize appointments based on their status
           if (status == 'upcoming') {
             setState(() {
               upcomingAppointments.add(appointmentData);
@@ -87,25 +90,39 @@ class _AppointmentsPageState extends State<Appointments>
     try {
       // Combine appointment date and time into a single DateTime object
       String dateTimeString = '$appointmentDate $appointmentTime';
-      DateFormat format = DateFormat('dd MMM yyyy hh.mm a'); // Adjust format as per your data
+
+      // Ensure the format string matches the exact format of your date and time inputs
+      DateFormat format = DateFormat('dd MMM yyyy hh:mm a'); // Adjusted format
+
+      // Parse the appointment date and time into a DateTime object
       DateTime appointmentDateTime = format.parse(dateTimeString);
 
-      // Compare with the current date and time
+      // Get the current date and time for comparison
       DateTime now = DateTime.now();
+
+      // Return true if the appointment has passed (i.e., is before the current time)
       return appointmentDateTime.isBefore(now);
     } catch (e) {
       print('Error parsing date/time: $e');
-      return false;
+      return false;  // If there's an error, assume the appointment is not expired
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Bookings'),
+        title: Text(
+          'My Bookings',
+          style: TextStyle(
+            fontSize: 20,         // Set the font size to 20
+            fontWeight: FontWeight.bold,  // Optional: make the text bold
+          ),
+        ),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Color(0xFF0000FF),         // Set selected tab text color to blue
+          unselectedLabelColor: Colors.black,  // Unselected tab text color
+          indicatorColor: Color(0xFF0000FF),     // Set indicator color to blue
           tabs: [
             Tab(text: 'Upcoming'),
             Tab(text: 'Completed'),
@@ -168,9 +185,11 @@ class AppointmentCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(appointment['Document']),
+                  backgroundImage: appointment['DoctorProfileImage'] != null && appointment['DoctorProfileImage'].isNotEmpty
+                      ? NetworkImage(appointment['DoctorProfileImage'])
+                      : AssetImage('assets/placeholder_image.png'), // Provide a default placeholder image
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 30),
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,9 +200,13 @@ class AppointmentCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(appointment['DoctorSpecialist']),
-                      Text('${appointment['PatientName']}, ${appointment['Gender']}, Age ${appointment['PatientAge']}'),
-                      Text('Book ID: ${appointment['BookingID']}',
-                          style: TextStyle(color: Color(0xFF0000FF))),
+                      Text(
+                        '${appointment['PatientName']}, ${appointment['Gender']}, Age ${appointment['PatientAge']}',
+                      ),
+                      Text(
+                        'Book ID: ${appointment['BookingID']}',
+                        style: TextStyle(color: Color(0xFF0000FF)),
+                      ),
                     ],
                   ),
                 ),
@@ -201,7 +224,10 @@ class AppointmentCard extends StatelessWidget {
                     onPressed: () {
                       _cancelAppointment(appointment['BookingID']);
                     },
-                    child: Text('Cancel',style: TextStyle(color: Color(0xFF0000FF)))
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: Color(0xFF0000FF)),
+                    ),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -210,7 +236,10 @@ class AppointmentCard extends StatelessWidget {
                     onPressed: () {
                       _rescheduleAppointment(appointment['BookingID']);
                     },
-                    child: Text('Reschedule', style: TextStyle(color: Colors.white))
+                    child: Text(
+                      'Reschedule',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
