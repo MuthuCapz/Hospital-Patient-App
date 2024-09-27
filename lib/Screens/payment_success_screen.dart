@@ -2,22 +2,24 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(PaymentSuccessScreen());
+  runApp(const PaymentSuccessScreen());
 }
 
 class PaymentSuccessScreen extends StatelessWidget {
+  const PaymentSuccessScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               // Handle back button functionality
             },
           ),
-          title: Text("Payment"),
+          title: const Text("Payment"),
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
@@ -30,48 +32,48 @@ class PaymentSuccessScreen extends StatelessWidget {
             children: [
               // Success Icon
               Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.blue,
                 ),
-                padding: EdgeInsets.all(20),
-                child: Icon(
+                padding: const EdgeInsets.all(20),
+                child: const Icon(
                   Icons.check_circle,
                   color: Colors.white,
                   size: 80,
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Payment Successful Text
-              Text(
+              const Text(
                 "Payment Successful!",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
               // Subheading Text
-              Text(
+              const Text(
                 "You have successfully booked appointment with",
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
                 ),
               ),
-              Text(
-                "Dr. Riman Anira",
+              const Text(
+                "Dr. Roman Andra",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // User Details Section
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.person, color: Colors.blue),
@@ -82,10 +84,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
               // Price Section
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.attach_money, color: Colors.blue),
@@ -96,10 +98,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
               // Date Section
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.calendar_today, color: Colors.blue),
@@ -110,10 +112,10 @@ class PaymentSuccessScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
               // Time Section
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.access_time, color: Colors.blue),
@@ -124,13 +126,14 @@ class PaymentSuccessScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Buttons
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue, // Background color
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -138,17 +141,17 @@ class PaymentSuccessScreen extends StatelessWidget {
                 onPressed: () {
                   // Handle View Appointment
                 },
-                child: Text(
+                child: const Text(
                   "View Appointment",
                   style: TextStyle(fontSize: 16),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
                   // Handle Go to Home
                 },
-                child: Text(
+                child: const Text(
                   "Go to Home",
                   style: TextStyle(
                     fontSize: 16,

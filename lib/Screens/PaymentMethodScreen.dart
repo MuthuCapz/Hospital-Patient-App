@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:upi_india/upi_india.dart';
 
+import 'payment_success_screen.dart';
+
 void main() {
   runApp(PaymentMethodsApp());
 }
@@ -22,8 +24,8 @@ class PaymentMethodsScreen extends StatefulWidget {
 
 class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   String _selectedPaymentMethod = 'Google Pay';
-  String _upiID = "viprevf@hsbc"; // Replace with the UPI ID
-  String _payeeName = "Fishfy"; // Replace with the payee name
+  final String _upiID = "9845779437.ibz@icici"; // Replace with the UPI ID
+  final String _payeeName = "Fishfy"; // Replace with the payee name
   String _transactionNote = "Payment Note"; // Replace with a transaction note
   double _amount = 1.00; // Set ₹1 for the transaction
 
@@ -84,6 +86,20 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   Widget _displayUpiResponse(UpiResponse response) {
     String txnStatus = response.status ?? "Unknown";
 
+    // Navigate to PaymentSuccessScreen regardless of failure or success
+    Future.microtask(() {
+      if (txnStatus == UpiPaymentStatus.SUCCESS ||
+          txnStatus == UpiPaymentStatus.FAILURE ||
+          txnStatus == UpiPaymentStatus.SUBMITTED) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessScreen(),
+          ),
+        );
+      }
+    });
+
     if (txnStatus == UpiPaymentStatus.SUCCESS) {
       return Column(
         children: [
@@ -95,7 +111,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       return Column(
         children: [
           Text('Transaction Failed. Please try again.'),
-          Text('Error Code: ${response.responseCode}'),
+          Text(''),
         ],
       );
     } else if (txnStatus == UpiPaymentStatus.SUBMITTED) {
@@ -217,7 +233,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Text("Processing transaction...");
                 } else if (snapshot.hasError) {
-                  return Text("Error: ${snapshot.error}");
+                  return Text("");
                 } else if (snapshot.hasData) {
                   if (snapshot.data == null) {
                     return Text("No response received. Try again.");
@@ -225,7 +241,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                     return _displayUpiResponse(snapshot.data!);
                   }
                 } else {
-                  return Text("Unknown issue occurred. Please try again.");
+                  return Text("");
                 }
               },
             ),
