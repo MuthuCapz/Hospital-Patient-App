@@ -55,19 +55,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 imagePath: 'assets/images/onboarding1.png',
                 title: 'Learn About Your Doctors',
                 description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
               ),
               OnboardingPage(
                 imagePath: 'assets/images/onboarding2.png',
                 title: 'Effortless Appointment Booking',
                 description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
               ),
               OnboardingPage(
                 imagePath: 'assets/images/onboarding3.png',
                 title: 'Discover Experienced Doctors',
                 description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel felis nec magna consequat tincidunt.',
               ),
             ],
           ),
@@ -81,24 +81,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 currentPage == 0
                     ? SizedBox.shrink()
                     : Container(
-                  decoration: BoxDecoration(
-                    color: Colors.transparent, // No fill color
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Color(0xFF0000FF), // Stroke color
-                      width: 2.0, // Stroke width
-                    ),
-                  ),
-                  child: IconButton(
-                    icon:
-                    Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
-                    onPressed: () {
-                      _pageController.previousPage(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.ease);
-                    },
-                  ),
-                ),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent, // No fill color
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Color(0xFF0000FF), // Stroke color
+                            width: 2.0, // Stroke width
+                          ),
+                        ),
+                        child: IconButton(
+                          icon:
+                              Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
+                          onPressed: () {
+                            _pageController.previousPage(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.ease);
+                          },
+                        ),
+                      ),
                 Row(
                   children: _buildPageIndicators(),
                 ),
@@ -129,8 +129,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 20.0,
             child: GestureDetector(
               onTap: () {
-                // Skip to the login screen and mark onboarding as complete
-                _completeOnboarding();
+                if (currentPage < 2) {
+                  // Move to the next page in the onboarding
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.ease,
+                  );
+                } else {
+                  // If it's the last page, complete onboarding
+                  _completeOnboarding();
+                }
               },
               child: Text(
                 'Skip',
