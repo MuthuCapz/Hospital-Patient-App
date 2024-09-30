@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -65,9 +65,11 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      DatabaseReference profileRef =
-          FirebaseDatabase.instance.ref().child('Profile').child(user.uid);
+      // Use Firestore instead of Realtime Database
+      DocumentReference profileRef =
+          FirebaseFirestore.instance.collection('Profile').doc(user.uid);
 
+      // Update user profile data in Firestore
       await profileRef.set({
         'name': name,
         'phone': phoneNumber,
@@ -88,7 +90,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         content: Text("Profile updated successfully!"),
       ));
 
-      // Navigate to ManualProfileScreen
+      // Navigate to HomeScreen after saving profile
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),

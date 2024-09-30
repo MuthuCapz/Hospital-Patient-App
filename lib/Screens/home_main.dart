@@ -34,7 +34,6 @@ class _HomeScreenState extends State<HomeMain> {
     _fetchProfileImageUrl(); // Fetch profile image URL on initialization
   }
 
-
   Future<void> _fetchLocality() async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -79,11 +78,8 @@ class _HomeScreenState extends State<HomeMain> {
       print("Error fetching locality: $e");
     }
   }
-
-
   Future<void> _fetchDoctors() async {
     try {
-      // Create an instance of Firestore
       final CollectionReference doctorsCollection = FirebaseFirestore.instance.collection('DoctorsList');
 
       // Fetch the documents from the collection
@@ -94,7 +90,7 @@ class _HomeScreenState extends State<HomeMain> {
 
         // Iterate through the documents to create Doctor objects
         for (var doc in snapshot.docs) {
-          final doctor = Doctor.fromFirestore(doc); // Use a factory method to create Doctor from Firestore doc
+          final doctor = Doctor.fromFirestore(doc); // Use the fromFirestore method
           fetchedDoctors.add(doctor);
         }
 

@@ -8,18 +8,18 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final PageController _pageController = PageController();
+  PageController _pageController = PageController();
   int currentPage = 0;
 
   List<Widget> _buildPageIndicators() {
     return List<Widget>.generate(3, (int index) {
       return AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+        duration: Duration(milliseconds: 150),
+        margin: EdgeInsets.symmetric(horizontal: 5.0),
         height: 10.0,
         width: index == currentPage ? 20.0 : 10.0,
         decoration: BoxDecoration(
-          color: index == currentPage ? const Color(0xFF0000FF) : Colors.grey,
+          color: index == currentPage ? Color(0xFF0000FF) : Colors.grey,
           borderRadius: BorderRadius.circular(5.0),
         ),
       );
@@ -79,22 +79,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 currentPage == 0
-                    ? const SizedBox.shrink()
+                    ? SizedBox.shrink()
                     : Container(
                   decoration: BoxDecoration(
                     color: Colors.transparent, // No fill color
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF0000FF), // Stroke color
+                      color: Color(0xFF0000FF), // Stroke color
                       width: 2.0, // Stroke width
                     ),
                   ),
                   child: IconButton(
                     icon:
-                    const Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
+                    Icon(Icons.arrow_back, color: Color(0xFF0000FF)),
                     onPressed: () {
                       _pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
+                          duration: Duration(milliseconds: 300),
                           curve: Curves.ease);
                     },
                   ),
@@ -103,16 +103,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   children: _buildPageIndicators(),
                 ),
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Color(0xFF0000FF), // Filled background color
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                    icon: Icon(Icons.arrow_forward, color: Colors.white),
                     onPressed: () {
                       if (currentPage < 2) {
                         _pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
+                            duration: Duration(milliseconds: 300),
                             curve: Curves.ease);
                       } else {
                         // Complete onboarding
@@ -129,10 +129,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             right: 20.0,
             child: GestureDetector(
               onTap: () {
-                // Skip to the login screen and mark onboarding as complete
-                _completeOnboarding();
+                if (currentPage < 2) {
+                  // Move to the next page in the onboarding
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.ease,
+                  );
+                } else {
+                  // If it's the last page, complete onboarding
+                  _completeOnboarding();
+                }
               },
-              child: const Text(
+              child: Text(
                 'Skip',
                 style: TextStyle(
                   fontSize: 18.0,
@@ -167,20 +175,20 @@ class OnboardingPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(imagePath, height: 300.0),
-          const SizedBox(height: 20.0),
+          SizedBox(height: 20.0),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0000FF),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 10.0),
+          SizedBox(height: 10.0),
           Text(
             description,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16.0,
               color: Colors.black54,
             ),

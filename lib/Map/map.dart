@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wellmed/Screens/showprofile.dart';
 
 class MapScreen extends StatefulWidget {
@@ -132,11 +132,9 @@ class _MapScreenState extends State<MapScreen> {
           ? "${placemarks[0].name}, ${placemarks[0].locality}, ${placemarks[0].administrativeArea}, ${placemarks[0].country}"
           : "Address not found";
 
-      // Save the locality, address, latitude, and longitude to Firebase
-      DatabaseReference ref = FirebaseDatabase.instance
-          .ref()
-          .child('Patient Location')
-          .child(userId);
+      // Save the locality, address, latitude, and longitude to Firestore
+      DocumentReference ref =
+          FirebaseFirestore.instance.collection('Patient Location').doc(userId);
 
       await ref.set({
         'locality': locality, // Storing locality

@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -10,9 +10,9 @@ class Appointments extends StatefulWidget {
 
 class _AppointmentsPageState extends State<Appointments>
     with SingleTickerProviderStateMixin {
-  List<Map<dynamic, dynamic>> upcomingAppointments = [];
-  List<Map<dynamic, dynamic>> completedAppointments = [];
-  List<Map<dynamic, dynamic>> canceledAppointments = [];
+  List<Map<String, dynamic>> upcomingAppointments = [];
+  List<Map<String, dynamic>> completedAppointments = [];
+  List<Map<String, dynamic>> canceledAppointments = [];
   String? currentUserID;
 
   TabController? _tabController;
@@ -35,54 +35,51 @@ class _AppointmentsPageState extends State<Appointments>
     }
   }
 
-  // Function to fetch appointments of the current user from Firebase
-  void _fetchAppointments() {
+  // Function to fetch appointments of the current user from Firestore
+  void _fetchAppointments() async {
     if (currentUserID == null) return;
 
-    DatabaseReference appointmentsRef = FirebaseDatabase.instance
-        .ref()
-        .child("Patient Appointments")
-        .child(currentUserID!);
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference appointmentsRef =
+    firestore.collection("Patient Appointments").doc(currentUserID).collection('Appointments');
 
-    appointmentsRef.once().then((DatabaseEvent event) {
-      Map<dynamic, dynamic>? values =
-      event.snapshot.value as Map<dynamic, dynamic>?;
+    QuerySnapshot snapshot = await appointmentsRef.get();
 
-      if (values != null) {
-        values.forEach((bookingId, appointmentData) {
-          String status = appointmentData['status'] ?? 'upcoming';
-          appointmentData['BookingID'] = bookingId;
+    if (snapshot.docs.isNotEmpty) {
+      for (QueryDocumentSnapshot doc in snapshot.docs) {
+        Map<String, dynamic> appointmentData = doc.data() as Map<String, dynamic>;
+        String status = appointmentData['status'] ?? 'upcoming';
+        appointmentData['BookingID'] = doc.id;
 
-          // Check if the appointment has expired
-          bool isExpired = _checkIfAppointmentExpired(
-              appointmentData['AppointmentDate'], appointmentData['AppointmentTime']);
+        // Check if the appointment has expired
+        bool isExpired = _checkIfAppointmentExpired(
+            appointmentData['AppointmentDate'], appointmentData['AppointmentTime']);
 
-          // Update status to 'canceled' if the appointment has expired
-          if (isExpired && status != 'canceled') {
-            status = 'canceled';
-            appointmentData['status'] = 'canceled';  // Update local status
+        // Update status to 'canceled' if the appointment has expired
+        if (isExpired && status != 'canceled') {
+          status = 'canceled';
+          appointmentData['status'] = 'canceled';  // Update local status
 
-            // Update Firebase to mark appointment as canceled
-            appointmentsRef.child(bookingId).update({'status': 'canceled'});
-          }
+          // Update Firestore to mark appointment as canceled
+          await appointmentsRef.doc(doc.id).update({'status': 'canceled'});
+        }
 
-          // Categorize appointments based on their status
-          if (status == 'upcoming') {
-            setState(() {
-              upcomingAppointments.add(appointmentData);
-            });
-          } else if (status == 'completed') {
-            setState(() {
-              completedAppointments.add(appointmentData);
-            });
-          } else if (status == 'canceled') {
-            setState(() {
-              canceledAppointments.add(appointmentData);
-            });
-          }
-        });
+        // Categorize appointments based on their status
+        if (status == 'upcoming') {
+          setState(() {
+            upcomingAppointments.add(appointmentData);
+          });
+        } else if (status == 'completed') {
+          setState(() {
+            completedAppointments.add(appointmentData);
+          });
+        } else if (status == 'canceled') {
+          setState(() {
+            canceledAppointments.add(appointmentData);
+          });
+        }
       }
-    });
+    }
   }
 
   // Function to check if the appointment date and time are expired
@@ -107,6 +104,7 @@ class _AppointmentsPageState extends State<Appointments>
       return false;  // If there's an error, assume the appointment is not expired
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +140,7 @@ class _AppointmentsPageState extends State<Appointments>
   }
 
   // Function to build appointment list based on data
-  Widget _buildAppointmentList(List<Map<dynamic, dynamic>> appointments, bool showButtons) {
+  Widget _buildAppointmentList(List<Map<String, dynamic>> appointments, bool showButtons) {
     if (appointments.isEmpty) {
       return Center(child: Text('No Appointments'));
     }
@@ -159,7 +157,7 @@ class _AppointmentsPageState extends State<Appointments>
 
 // Widget for displaying appointment card
 class AppointmentCard extends StatelessWidget {
-  final Map<dynamic, dynamic> appointment;
+  final Map<String, dynamic> appointment;
   final bool showButtons;
 
   const AppointmentCard({Key? key, required this.appointment, required this.showButtons}) : super(key: key);
