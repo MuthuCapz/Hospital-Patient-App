@@ -1,13 +1,11 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 // Import the login screen
 import 'package:wellmed/Screens/YourProfile.dart';
-
 import '../Auth/login.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -17,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late DatabaseReference _profileRef;
+  late DocumentReference _profileRef;
   late String userId;
   String? profileImageUrl;
   File? _image;
@@ -26,23 +24,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     userId = _auth.currentUser!.uid;
-    _profileRef = FirebaseDatabase.instance.reference().child('Profile').child(userId);
+    _profileRef = FirebaseFirestore.instance.collection('Profile').doc(userId);
     _getProfileData();
   }
 
-  // Retrieve profile image from Firebase Realtime Database
+  // Retrieve profile image from Firestore
   Future<void> _getProfileData() async {
-    final DatabaseEvent event = await _profileRef.once();
-    if (event.snapshot.exists) {
+    final docSnapshot = await _profileRef.get();
+    if (docSnapshot.exists) {
       setState(() {
-        profileImageUrl = event.snapshot.child('profile_image').value as String?;
+        profileImageUrl = docSnapshot['profile_image'] as String?;
       });
     }
   }
 
   // Image picker for selecting profile image
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().getImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -51,11 +50,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Upload the selected image to Firebase Storage and update Realtime Database
+  // Upload the selected image to Firebase Storage and update Firestore
   Future<void> _uploadImage() async {
     if (_image == null) return;
 
-    final storageRef = FirebaseStorage.instance.ref().child('profile_images').child('$userId.jpg');
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('profile_images')
+        .child('$userId.jpg');
     await storageRef.putFile(_image!);
 
     final imageUrl = await storageRef.getDownloadURL();
@@ -73,7 +75,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Navigate to login.dart after logout
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Assuming the login screen is called LoginScreen
+      MaterialPageRoute(
+          builder: (context) =>
+              LoginScreen()), // Assuming the login screen is called LoginScreen
     );
   }
 
@@ -84,7 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Color(0xFF0000FF),
         elevation: 0,
         title: Padding(
-          padding: const EdgeInsets.only(left: 40.0), // 40dp padding to the left
+          padding:
+              const EdgeInsets.only(left: 40.0), // 40dp padding to the left
           child: Text(
             'My Profile',
             style: TextStyle(
@@ -105,7 +110,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   radius: 60,
                   backgroundImage: profileImageUrl != null
                       ? NetworkImage(profileImageUrl!)
-                      : AssetImage('assets/default_profile.png') as ImageProvider,
+                      : AssetImage('assets/default_profile.png')
+                          as ImageProvider,
                 ),
               ],
             ),
@@ -160,7 +166,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileOption({required IconData icon, required String title, required Function() onTap}) {
+  Widget _buildProfileOption(
+      {required IconData icon,
+      required String title,
+      required Function() onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
