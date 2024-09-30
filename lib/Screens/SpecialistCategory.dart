@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../models/Doctor.dart'; // Import your Doctor model
@@ -23,26 +24,29 @@ class _SpecialistCategoryState extends State<SpecialistCategory> {
 
   Future<void> _fetchSpecialists() async {
     try {
-      final snapshot = await _database.child('DoctorsList').get();
+      // Get the Firestore collection
+      final specialistsCollection = FirebaseFirestore.instance.collection('DoctorsList');
 
-      if (snapshot.exists) {
-        final Map<dynamic, dynamic> doctorsMap = snapshot.value as Map<dynamic, dynamic>;
+      // Query the collection for specialists matching the selected category
+      final querySnapshot = await specialistsCollection.where('specialist', isEqualTo: widget.specialistCategory).get();
+
+      // Check if there are any documents returned
+      if (querySnapshot.docs.isNotEmpty) {
         final List<Doctor> fetchedSpecialists = [];
 
-        doctorsMap.forEach((key, value) {
-          final data = value as Map<dynamic, dynamic>;
+        for (var doc in querySnapshot.docs) {
+          final data = doc.data();
+
+          // Create a Doctor instance from the document data
           final doctor = Doctor(
             name: data['name'] ?? '',
             specialist: data['specialist'] ?? '',
             profileImage: data['profile_image'] ?? '',
-            // Fetch the location
+            // Fetch the location if needed
           );
 
-          // Check if the doctor's specialist matches the selected category
-          if (doctor.specialist == widget.specialistCategory) {
-            fetchedSpecialists.add(doctor);
-          }
-        });
+          fetchedSpecialists.add(doctor);
+        }
 
         setState(() {
           _specialists = fetchedSpecialists;

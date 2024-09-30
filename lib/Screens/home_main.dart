@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class _HomeScreenState extends State<HomeMain> {
     _fetchProfileImageUrl(); // Fetch profile image URL on initialization
   }
 
+
   Future<void> _fetchLocality() async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -43,22 +45,26 @@ class _HomeScreenState extends State<HomeMain> {
         return;
       }
 
-      // First, try to retrieve locality from "Patient Location"
-      final patientLocationSnapshot =
-      await _database.child('Patient Location/$userId/locality').get();
+      // Reference to the Firestore document for the user's patient location
+      final patientLocationDoc = await FirebaseFirestore.instance
+          .collection('Patient Location')
+          .doc(userId)
+          .get();
 
-      if (patientLocationSnapshot.exists) {
+      if (patientLocationDoc.exists) {
         setState(() {
-          _locality = patientLocationSnapshot.value.toString();
+          _locality = patientLocationDoc['locality'] ?? 'Not found in Patient Location'; // Get locality or default message
         });
       } else {
         // If "Patient Location" is not found, try retrieving city from "Manual Location"
-        final manualLocationSnapshot =
-        await _database.child('Manual Location/$userId/city').get();
+        final manualLocationDoc = await FirebaseFirestore.instance
+            .collection('Manual Location')
+            .doc(userId)
+            .get();
 
-        if (manualLocationSnapshot.exists) {
+        if (manualLocationDoc.exists) {
           setState(() {
-            _locality = manualLocationSnapshot.value.toString();
+            _locality = manualLocationDoc['city'] ?? 'Not found in Manual Location'; // Get city or default message
           });
         } else {
           setState(() {
@@ -74,18 +80,23 @@ class _HomeScreenState extends State<HomeMain> {
     }
   }
 
+
   Future<void> _fetchDoctors() async {
     try {
-      final snapshot = await _database.child('DoctorsList').get();
+      // Create an instance of Firestore
+      final CollectionReference doctorsCollection = FirebaseFirestore.instance.collection('DoctorsList');
 
-      if (snapshot.exists && snapshot.value != null) {
+      // Fetch the documents from the collection
+      final QuerySnapshot snapshot = await doctorsCollection.get();
+
+      if (snapshot.docs.isNotEmpty) {
         final List<Doctor> fetchedDoctors = [];
 
-        // Iterate through the Firebase data to create Doctor objects
-        snapshot.children.forEach((child) {
-          final doctor = Doctor.fromSnapshot(child); // Use fromSnapshot factory
+        // Iterate through the documents to create Doctor objects
+        for (var doc in snapshot.docs) {
+          final doctor = Doctor.fromFirestore(doc); // Use a factory method to create Doctor from Firestore doc
           fetchedDoctors.add(doctor);
-        });
+        }
 
         setState(() {
           _doctors = fetchedDoctors;
@@ -103,6 +114,7 @@ class _HomeScreenState extends State<HomeMain> {
     }
   }
 
+
   Future<void> _fetchProfileImageUrl() async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -113,12 +125,12 @@ class _HomeScreenState extends State<HomeMain> {
         return;
       }
 
-      final profileImageSnapshot =
-      await _database.child('Profile/$userId/profile_image').get();
+      // Reference to the Firestore document for the user's profile
+      final userDoc = await FirebaseFirestore.instance.collection('Profile').doc(userId).get();
 
-      if (profileImageSnapshot.exists) {
+      if (userDoc.exists) {
         setState(() {
-          _profileImageUrl = profileImageSnapshot.value.toString();
+          _profileImageUrl = userDoc['profile_image'] ?? ''; // Get the image URL or default to empty
         });
       } else {
         setState(() {

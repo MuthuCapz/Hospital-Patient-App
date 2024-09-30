@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:wellmed/Screens/patientdetails.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(MyApp());
@@ -79,35 +80,34 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
     ]; // Combine slots
     _fetchDoctorDetails();
   }
-
   Future<void> _fetchDoctorDetails() async {
     try {
-      final snapshot = await FirebaseDatabase.instance.ref('DoctorsList').get();
+      // Reference to the Firestore collection
+      final CollectionReference doctorsCollection =
+      FirebaseFirestore.instance.collection('DoctorsList');
 
-      if (snapshot.exists) {
-        final doctorsData = snapshot.value as Map<dynamic, dynamic>;
+      // Query to find the doctor with the specified name and specialist
+      final QuerySnapshot querySnapshot = await doctorsCollection
+          .where('name', isEqualTo: name)
+          .where('specialist', isEqualTo: specialist)
+          .get();
 
-        for (var doctorData in doctorsData.values) {
-          final doctor = doctorData as Map<dynamic, dynamic>;
+      if (querySnapshot.docs.isNotEmpty) {
+        final doctorData = querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-          if (doctor['name'] == name && doctor['specialist'] == specialist) {
-            setState(() {
-              profileImage = doctor['profile_image'] ?? '';
-              aboutMe = doctor['about_me'] ?? '';
-              certifications = doctor['certifications'] ?? '';
-              experience = doctor['experience'] ?? '';
-              location = doctor['location'] ?? ''; // Fetching location
-              patients = doctor['patients'] ?? ''; // Fetching patient count
-            });
-            break; // Stop iterating once we find the matching doctor
-          }
-        }
+        setState(() {
+          profileImage = doctorData['profile_image'] ?? '';
+          aboutMe = doctorData['about_me'] ?? '';
+          certifications = doctorData['certifications'] ?? '';
+          experience = doctorData['experience'] ?? '';
+          location = doctorData['location'] ?? ''; // Fetching location
+          patients = doctorData['patients'] ?? ''; // Fetching patient count
+        });
       }
     } catch (e) {
       print('Error fetching doctor details: $e');
     }
   }
-
   List<DateTime> getDatesForMonth(DateTime currentMonth) {
     List<DateTime> days = [];
     int daysInMonth =
