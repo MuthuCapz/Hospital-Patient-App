@@ -1,8 +1,8 @@
 import 'dart:io'; // For handling files
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart'; // For showing toast messages
 
@@ -19,8 +19,8 @@ class _ProfileState extends State<Profile> {
   String? _profileImageUrl;
   final List<String> _genders = ['Male', 'Female', 'Other'];
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref().child(
-      "Profile");
+  final FirebaseFirestore _firestore =
+      FirebaseFirestore.instance; // Firestore instance
 
   @override
   void initState() {
@@ -31,14 +31,14 @@ class _ProfileState extends State<Profile> {
   Future<void> _getProfileData() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final snapshot = await _dbRef.child(user.uid).get();
+      final DocumentSnapshot snapshot =
+          await _firestore.collection('Profile').doc(user.uid).get();
       if (snapshot.exists) {
-        final data = snapshot.value as Map;
+        final data = snapshot.data() as Map<String, dynamic>;
         setState(() {
           _nameController.text = data['name'] ?? '';
           _phoneController.text = data['phone'] ?? '';
-          _emailController.text = data['email'] ?? user.email ??
-              ''; // Set email from Firebase or FirebaseAuth
+          _emailController.text = data['email'] ?? user.email ?? '';
           _selectedGender = data['gender'];
           _profileImageUrl = data['profile_image'];
         });
@@ -49,8 +49,8 @@ class _ProfileState extends State<Profile> {
   Future<void> _updateProfileData() async {
     final user = _auth.currentUser;
     if (user != null) {
-      // Update the Firebase database with new details
-      await _dbRef.child(user.uid).update({
+      // Update the Firestore document with new details
+      await _firestore.collection('Profile').doc(user.uid).set({
         'name': _nameController.text,
         'phone': _phoneController.text,
         'email': _emailController.text, // Update email in Profile path
@@ -111,7 +111,8 @@ class _ProfileState extends State<Profile> {
           },
         ),
       ),
-      body: SingleChildScrollView( // Makes the content scrollable
+      body: SingleChildScrollView(
+        // Makes the content scrollable
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -123,8 +124,8 @@ class _ProfileState extends State<Profile> {
                       radius: 50,
                       backgroundImage: _profileImageUrl != null
                           ? NetworkImage(_profileImageUrl!)
-                          : AssetImage(
-                          'assets/default_profile.png') as ImageProvider,
+                          : AssetImage('assets/default_profile.png')
+                              as ImageProvider,
                     ),
                     Positioned(
                       bottom: 0,
@@ -181,11 +182,10 @@ class _ProfileState extends State<Profile> {
               DropdownButtonFormField<String>(
                 value: _selectedGender,
                 items: _genders
-                    .map((gender) =>
-                    DropdownMenuItem<String>(
-                      value: gender,
-                      child: Text(gender),
-                    ))
+                    .map((gender) => DropdownMenuItem<String>(
+                          value: gender,
+                          child: Text(gender),
+                        ))
                     .toList(),
                 onChanged: (value) {
                   setState(() {
@@ -221,7 +221,8 @@ class _ProfileState extends State<Profile> {
           ),
         ),
       ),
-      resizeToAvoidBottomInset: true, // Adjusts the layout when the keyboard appears
+      resizeToAvoidBottomInset:
+          true, // Adjusts the layout when the keyboard appears
     );
   }
 }
