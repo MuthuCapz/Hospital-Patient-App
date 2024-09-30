@@ -36,7 +36,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
   // Method to open the UPI app based on the selected payment method
   void _openPaymentApp() async {
     String upiUrl =
-        "upi://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR";
+        "upi://pay?pa=$_upiID&pn=${Uri.encodeComponent(_payeeName)}&tn=${Uri.encodeComponent(_transactionNote)}&am=${_amount.toStringAsFixed(2)}&cu=INR&pn=Google%20Pay";
 
     print(upiUrl); // Debugging the UPI URL
 

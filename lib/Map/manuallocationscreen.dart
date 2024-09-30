@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
 import 'package:wellmed/Screens/showprofile.dart';
 
 class ManualLocationScreen extends StatefulWidget {
@@ -16,7 +16,8 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
   final _cityController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _databaseRef = FirebaseDatabase.instance.reference();
+  final CollectionReference _firestoreRef =
+      FirebaseFirestore.instance.collection('Manual Location');
 
   void _saveLocation() async {
     if (_formKey.currentState?.validate() ?? false) {
@@ -24,20 +25,25 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
       if (user != null) {
         final userId = user.uid;
 
-        await _databaseRef.child('Manual Location').child(userId).set({
-          'name': _nameController.text,
-          'door_no_flat_no': _doorController.text,
-          'address': _addressController.text,
-          'city': _cityController.text,
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Location saved successfully')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CompleteProfileScreen()),
-        );
+        try {
+          await _firestoreRef.doc(userId).set({
+            'name': _nameController.text,
+            'door_no_flat_no': _doorController.text,
+            'address': _addressController.text,
+            'city': _cityController.text,
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location saved successfully')),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CompleteProfileScreen()),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error saving location: $e')),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('User not logged in')),
@@ -58,7 +64,6 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        // Wrapping the content in SingleChildScrollView
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Form(
           key: _formKey,

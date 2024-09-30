@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -44,21 +45,25 @@ class _HomeScreenState extends State<HomeMain> {
       }
 
       // First, try to retrieve locality from "Patient Location"
-      final patientLocationSnapshot =
-          await _database.child('Patient Location/$userId/locality').get();
+      final patientLocationSnapshot = await FirebaseFirestore.instance
+          .collection('Patient Location')
+          .doc(userId)
+          .get();
 
       if (patientLocationSnapshot.exists) {
         setState(() {
-          _locality = patientLocationSnapshot.value.toString();
+          _locality = patientLocationSnapshot['locality'];
         });
       } else {
         // If "Patient Location" is not found, try retrieving city from "Manual Location"
-        final manualLocationSnapshot =
-            await _database.child('Manual Location/$userId/city').get();
+        final manualLocationSnapshot = await FirebaseFirestore.instance
+            .collection('Manual Location')
+            .doc(userId)
+            .get();
 
         if (manualLocationSnapshot.exists) {
           setState(() {
-            _locality = manualLocationSnapshot.value.toString();
+            _locality = manualLocationSnapshot['city'];
           });
         } else {
           setState(() {

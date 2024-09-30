@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -58,32 +59,22 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
       }
       final userId = user.uid;
 
-      // Reference to the user's appointments in Firebase
-      DatabaseReference appointmentsRef = FirebaseDatabase.instance
-          .reference()
-          .child('Patient Appointments')
-          .child(userId);
+      // Reference to the Firestore collection for appointments
+      CollectionReference appointmentsRef = FirebaseFirestore.instance
+          .collection('Patient Appointments')
+          .doc(userId)
+          .collection('Appointments');
 
       // Check if an appointment with the same doctor, time, and date already exists
-      DatabaseEvent event = await appointmentsRef.once();
-      DataSnapshot snapshot =
-          event.snapshot; // Extract the DataSnapshot from the DatabaseEvent
-      bool appointmentExists = false;
+      QuerySnapshot querySnapshot = await appointmentsRef
+          .where('DoctorName', isEqualTo: widget.DoctorName)
+          .where('AppointmentTime', isEqualTo: widget.AppointmentTime)
+          .where('AppointmentDate',
+              isEqualTo:
+                  DateFormat('dd MMM yyyy').format(widget.AppointmentDate))
+          .get();
 
-      if (snapshot.value != null) {
-        Map<dynamic, dynamic> appointments =
-            snapshot.value as Map<dynamic, dynamic>;
-        appointments.forEach((key, value) {
-          if (value['DoctorName'] == widget.DoctorName &&
-              value['AppointmentTime'] == widget.AppointmentTime &&
-              value['AppointmentDate'] ==
-                  DateFormat('dd MMM yyyy').format(widget.AppointmentDate)) {
-            appointmentExists = true;
-          }
-        });
-      }
-
-      if (appointmentExists) {
+      if (querySnapshot.docs.isNotEmpty) {
         // Show a message if the appointment already exists
         Fluttertoast.showToast(
           msg: "You already have an appointment with this doctor at this time.",
@@ -92,9 +83,6 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
         );
       } else {
         // Create a new appointment
-        DatabaseReference newAppointmentRef = appointmentsRef.push();
-
-        // Prepare data to save
         Map<String, dynamic> appointmentData = {
           'DoctorName': widget.DoctorName,
           'DoctorSpecialist': widget.DoctorSpecialist,
@@ -108,11 +96,11 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           'Gender': _selectedGender,
           'Document': _uploadedFileName ?? '',
           'PatientIssue': _patientIssue,
-          'Status': 'Upcoming'
+          'Status': 'Upcoming',
         };
 
-        // Save the data to Firebase
-        await newAppointmentRef.set(appointmentData);
+        // Save the data to Firestore
+        await appointmentsRef.add(appointmentData);
 
         // Show success message
         Fluttertoast.showToast(
