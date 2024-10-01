@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:wellmed/Screens/patientdetails.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,9 +19,9 @@ class MyApp extends StatelessWidget {
       ),
       home: DoctorBioScreen(
         doctorName:
-            'Dr. Riman Anira', // Sample name, replace with actual data from navigation
+        'Dr. Riman Anira', // Sample name, replace with actual data from navigation
         doctorSpecialist:
-            'Cardiologist', // Sample specialist, replace with actual data from navigation
+        'Cardiologist', // Sample specialist, replace with actual data from navigation
       ),
     );
   }
@@ -79,35 +80,34 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
     ]; // Combine slots
     _fetchDoctorDetails();
   }
-
   Future<void> _fetchDoctorDetails() async {
     try {
-      final snapshot = await FirebaseDatabase.instance.ref('DoctorsList').get();
+      // Reference to the Firestore collection
+      final CollectionReference doctorsCollection =
+      FirebaseFirestore.instance.collection('DoctorsList');
 
-      if (snapshot.exists) {
-        final doctorsData = snapshot.value as Map<dynamic, dynamic>;
+      // Query to find the doctor with the specified name and specialist
+      final QuerySnapshot querySnapshot = await doctorsCollection
+          .where('name', isEqualTo: name)
+          .where('specialist', isEqualTo: specialist)
+          .get();
 
-        for (var doctorData in doctorsData.values) {
-          final doctor = doctorData as Map<dynamic, dynamic>;
+      if (querySnapshot.docs.isNotEmpty) {
+        final doctorData = querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-          if (doctor['name'] == name && doctor['specialist'] == specialist) {
-            setState(() {
-              profileImage = doctor['profile_image'] ?? '';
-              aboutMe = doctor['about_me'] ?? '';
-              certifications = doctor['certifications'] ?? '';
-              experience = doctor['experience'] ?? '';
-              location = doctor['location'] ?? ''; // Fetching location
-              patients = doctor['patients'] ?? ''; // Fetching patient count
-            });
-            break; // Stop iterating once we find the matching doctor
-          }
-        }
+        setState(() {
+          profileImage = doctorData['profile_image'] ?? '';
+          aboutMe = doctorData['about_me'] ?? '';
+          certifications = doctorData['certifications'] ?? '';
+          experience = doctorData['experience'] ?? '';
+          location = doctorData['location'] ?? ''; // Fetching location
+          patients = doctorData['patients'] ?? ''; // Fetching patient count
+        });
       }
     } catch (e) {
       print('Error fetching doctor details: $e');
     }
   }
-
   List<DateTime> getDatesForMonth(DateTime currentMonth) {
     List<DateTime> days = [];
     int daysInMonth =
@@ -166,7 +166,7 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                     backgroundImage: profileImage.isNotEmpty
                         ? NetworkImage(profileImage)
                         : AssetImage('assets/doctor_image.jpg')
-                            as ImageProvider,
+                    as ImageProvider,
                   ),
                   SizedBox(width: 16),
                   Column(
@@ -242,7 +242,7 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                       setState(() {
                         selectedMorningTimeIndex = index;
                         selectedAfternoonTimeIndex =
-                            -1; // Deselect afternoon slot
+                        -1; // Deselect afternoon slot
                         selectedEveningTimeIndex = -1; // Deselect evening slot
                       });
                     },
@@ -305,7 +305,7 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                         selectedEveningTimeIndex = index;
                         selectedMorningTimeIndex = -1; // Deselect morning slot
                         selectedAfternoonTimeIndex =
-                            -1; // Deselect afternoon slot
+                        -1; // Deselect afternoon slot
                       });
                     },
                   );
@@ -370,14 +370,14 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                             _showOverdueToast(); // Show toast for past dates only
                           } else {
                             selectedDate = days[
-                                index]; // Select the date if not in the past
+                            index]; // Select the date if not in the past
                           }
                         });
                       },
                       child: Container(
                         margin: EdgeInsets.symmetric(horizontal: 8),
                         padding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         decoration: BoxDecoration(
                           color: isSelected ? Color(0xFF0000FF) : Colors.white,
                           borderRadius: BorderRadius.circular(10),
@@ -435,10 +435,10 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                             DoctorName: name,
                             DoctorSpecialist: specialist,
                             AppointmentTime:
-                                morningSlots[selectedMorningTimeIndex],
+                            morningSlots[selectedMorningTimeIndex],
                             AppointmentDate: selectedDate,
                             DoctorProfileImage:
-                                profileImage, // Pass the profile image here
+                            profileImage, // Pass the profile image here
                           ),
                         ),
                       );
@@ -450,10 +450,10 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                             DoctorName: name,
                             DoctorSpecialist: specialist,
                             AppointmentTime:
-                                afternoonSlots[selectedAfternoonTimeIndex],
+                            afternoonSlots[selectedAfternoonTimeIndex],
                             AppointmentDate: selectedDate,
                             DoctorProfileImage:
-                                profileImage, // Pass the profile image here
+                            profileImage, // Pass the profile image here
                           ),
                         ),
                       );
@@ -465,10 +465,10 @@ class _DoctorBioScreenState extends State<DoctorBioScreen> {
                             DoctorName: name,
                             DoctorSpecialist: specialist,
                             AppointmentTime:
-                                eveningSlots[selectedEveningTimeIndex],
+                            eveningSlots[selectedEveningTimeIndex],
                             AppointmentDate: selectedDate,
                             DoctorProfileImage:
-                                profileImage, // Pass the profile image here
+                            profileImage, // Pass the profile image here
                           ),
                         ),
                       );

@@ -1,4 +1,4 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../models/Doctor.dart'; // Import the Doctor model
 
@@ -8,7 +8,7 @@ class SearchDoctors extends StatefulWidget {
 }
 
 class _SearchDoctorsState extends State<SearchDoctors> {
-  final DatabaseReference _database = FirebaseDatabase.instance.ref().child('DoctorsList');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Doctor> _allDoctors = []; // List to hold all doctors
   List<Doctor> _filteredDoctors = []; // List to hold filtered doctors based on search
   String _searchQuery = ''; // Holds the current search query
@@ -21,15 +21,12 @@ class _SearchDoctorsState extends State<SearchDoctors> {
 
   Future<void> _fetchDoctors() async {
     try {
-      final snapshot = await _database.get();
+      QuerySnapshot snapshot = await _firestore.collection('DoctorsList').get();
 
-      if (snapshot.exists && snapshot.value != null) {
-        final List<Doctor> fetchedDoctors = [];
-
-        snapshot.children.forEach((child) {
-          final doctor = Doctor.fromSnapshot(child);
-          fetchedDoctors.add(doctor);
-        });
+      if (snapshot.docs.isNotEmpty) {
+        final List<Doctor> fetchedDoctors = snapshot.docs.map((doc) {
+          return Doctor.fromFirestore(doc); // Use fromFirestore method
+        }).toList();
 
         setState(() {
           _allDoctors = fetchedDoctors;

@@ -48,7 +48,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   }
 
   List<int> _ages =
-      List.generate(66, (index) => 15 + index); // Age from 15 to 80
+  List.generate(66, (index) => 15 + index); // Age from 15 to 80
 
   Future<void> _saveAppointment() async {
     try {
@@ -70,8 +70,8 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           .where('DoctorName', isEqualTo: widget.DoctorName)
           .where('AppointmentTime', isEqualTo: widget.AppointmentTime)
           .where('AppointmentDate',
-              isEqualTo:
-                  DateFormat('dd MMM yyyy').format(widget.AppointmentDate))
+          isEqualTo:
+          DateFormat('dd MMM yyyy').format(widget.AppointmentDate))
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
@@ -89,14 +89,14 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
           'AppointmentTime': widget.AppointmentTime,
           'DoctorProfileImage': widget.DoctorProfileImage,
           'AppointmentDate':
-              DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
+          DateFormat('dd MMM yyyy').format(widget.AppointmentDate),
           'PatientName': _patientName,
           'PatientAge': _selectedAge,
           'BookingFor': _selectedBookingFor,
           'Gender': _selectedGender,
           'Document': _uploadedFileName ?? '',
           'PatientIssue': _patientIssue,
-          'Status': 'Upcoming',
+          'status': 'upcoming',
         };
 
         // Save the data to Firestore
@@ -146,7 +146,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                       backgroundImage: NetworkImage(
                           widget.DoctorProfileImage), // Load image from URL
                       backgroundColor:
-                          Colors.grey[300], // Background color for placeholder
+                      Colors.grey[300], // Background color for placeholder
                     ),
                     SizedBox(width: 15), // Spacing between the avatar and text
                     Column(
@@ -226,7 +226,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                     onTap: _pickDocument,
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(
@@ -280,7 +280,7 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 textStyle:
-                    TextStyle(color: Colors.white), // Ensure text is white
+                TextStyle(color: Colors.white), // Ensure text is white
               ),
               child: Text(
                 'Next',

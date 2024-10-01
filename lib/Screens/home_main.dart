@@ -44,26 +44,26 @@ class _HomeScreenState extends State<HomeMain> {
         return;
       }
 
-      // First, try to retrieve locality from "Patient Location"
-      final patientLocationSnapshot = await FirebaseFirestore.instance
+      // Reference to the Firestore document for the user's patient location
+      final patientLocationDoc = await FirebaseFirestore.instance
           .collection('Patient Location')
           .doc(userId)
           .get();
 
-      if (patientLocationSnapshot.exists) {
+      if (patientLocationDoc.exists) {
         setState(() {
-          _locality = patientLocationSnapshot['locality'];
+          _locality = patientLocationDoc['locality'] ?? 'Not found in Patient Location'; // Get locality or default message
         });
       } else {
         // If "Patient Location" is not found, try retrieving city from "Manual Location"
-        final manualLocationSnapshot = await FirebaseFirestore.instance
+        final manualLocationDoc = await FirebaseFirestore.instance
             .collection('Manual Location')
             .doc(userId)
             .get();
 
-        if (manualLocationSnapshot.exists) {
+        if (manualLocationDoc.exists) {
           setState(() {
-            _locality = manualLocationSnapshot['city'];
+            _locality = manualLocationDoc['city'] ?? 'Not found in Manual Location'; // Get city or default message
           });
         } else {
           setState(() {
@@ -78,19 +78,21 @@ class _HomeScreenState extends State<HomeMain> {
       print("Error fetching locality: $e");
     }
   }
-
   Future<void> _fetchDoctors() async {
     try {
-      final snapshot = await _database.child('DoctorsList').get();
+      final CollectionReference doctorsCollection = FirebaseFirestore.instance.collection('DoctorsList');
 
-      if (snapshot.exists && snapshot.value != null) {
+      // Fetch the documents from the collection
+      final QuerySnapshot snapshot = await doctorsCollection.get();
+
+      if (snapshot.docs.isNotEmpty) {
         final List<Doctor> fetchedDoctors = [];
 
-        // Iterate through the Firebase data to create Doctor objects
-        snapshot.children.forEach((child) {
-          final doctor = Doctor.fromSnapshot(child); // Use fromSnapshot factory
+        // Iterate through the documents to create Doctor objects
+        for (var doc in snapshot.docs) {
+          final doctor = Doctor.fromFirestore(doc); // Use the fromFirestore method
           fetchedDoctors.add(doctor);
-        });
+        }
 
         setState(() {
           _doctors = fetchedDoctors;
@@ -108,6 +110,7 @@ class _HomeScreenState extends State<HomeMain> {
     }
   }
 
+
   Future<void> _fetchProfileImageUrl() async {
     try {
       final userId = _auth.currentUser?.uid;
@@ -118,12 +121,12 @@ class _HomeScreenState extends State<HomeMain> {
         return;
       }
 
-      final profileImageSnapshot =
-          await _database.child('Profile/$userId/profile_image').get();
+      // Reference to the Firestore document for the user's profile
+      final userDoc = await FirebaseFirestore.instance.collection('Profile').doc(userId).get();
 
-      if (profileImageSnapshot.exists) {
+      if (userDoc.exists) {
         setState(() {
-          _profileImageUrl = profileImageSnapshot.value.toString();
+          _profileImageUrl = userDoc['profile_image'] ?? ''; // Get the image URL or default to empty
         });
       } else {
         setState(() {
@@ -166,7 +169,7 @@ class _HomeScreenState extends State<HomeMain> {
                 backgroundImage: _profileImageUrl.isNotEmpty
                     ? NetworkImage(_profileImageUrl)
                     : const AssetImage('assets/images/default_profile.png')
-                        as ImageProvider,
+                as ImageProvider,
               ),
             ),
           ),
@@ -254,7 +257,7 @@ class _HomeScreenState extends State<HomeMain> {
                             'Search here',
                             style: TextStyle(
                                 color:
-                                    Colors.black54), // Placeholder text style
+                                Colors.black54), // Placeholder text style
                           ),
                         ),
                         Icon(Icons.filter_list, color: Colors.black),
@@ -295,7 +298,7 @@ class _HomeScreenState extends State<HomeMain> {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding:
-                        const EdgeInsets.only(left: 5.5), // Margin for ListView
+                    const EdgeInsets.only(left: 5.5), // Margin for ListView
                     children: [
                       _buildCategoryItem(
                           'General', 'assets/images/general.png'),
@@ -322,31 +325,31 @@ class _HomeScreenState extends State<HomeMain> {
           _doctors.isEmpty
               ? const Center(child: Text('No doctors found'))
               : ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: _doctors.length,
-                  itemBuilder: (context, index) {
-                    final doctor = _doctors[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DoctorBioScreen(
-                              doctorName: doctor.name,
-                              doctorSpecialist: doctor.specialist,
-                            ),
-                          ),
-                        );
-                      },
-                      child: _buildDoctorCard(
-                        doctor.name,
-                        doctor.specialist,
-                        doctor.profileImage,
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: _doctors.length,
+            itemBuilder: (context, index) {
+              final doctor = _doctors[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DoctorBioScreen(
+                        doctorName: doctor.name,
+                        doctorSpecialist: doctor.specialist,
                       ),
-                    );
-                  },
+                    ),
+                  );
+                },
+                child: _buildDoctorCard(
+                  doctor.name,
+                  doctor.specialist,
+                  doctor.profileImage,
                 ),
+              );
+            },
+          ),
         ]),
       ),
     );
